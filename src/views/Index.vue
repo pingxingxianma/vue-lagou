@@ -72,16 +72,9 @@
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
-    <section class="content-header">
-      <h1><span></span><small></small></h1>
-      <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
-        <li class="active">Here</li>
-      </ol>
-    </section>
+    <bread-crumb :title="title" :subtitle="subtitle"></bread-crumb>
 
     <!-- Main content -->
-    <!-- <section class="content" id="router-view"></section> -->
     <router-view></router-view>
     <!-- /.content -->
   </div>
@@ -178,17 +171,56 @@
 
 <script>
 import lagouHead from './Header.vue'
+import BreadCrumb from './BreadCrumb.vue'
 
 export default {
     name:'index',
     data() {
         return {
-            
+            title:'',
+            subtitle:''
         }
     },
+
     components:{
-      lagouHead
-    }
+      lagouHead,
+      BreadCrumb
+    },
+
+    methods: {
+    //   const match = {
+    //   '/home': ['首页', '欢迎信息'],
+    //   '/position': ['职位管理', '列表'],
+    //   '/position_search': ['职位管理', '列表'],
+    //   '/position_save': ['职位管理', '添加'],
+    //   '/position_update': ['职位管理', '编辑']
+    // }
+      changeBreadCramb(){
+        let path = this.$route.path;
+        switch(path){
+          case '/home':
+            this.title = '首页',
+            this.subtitle = '欢迎信息'
+            ; 
+          break;
+          case '/positionList':
+            this.title = '职位管理',
+            this.subtitle = '列表'
+            ; 
+          break;
+        }
+      }
+    },
+
+    mounted() {
+      this.changeBreadCramb();
+      // console.log(111,this.$route.path)
+    },
+
+    updated() {
+      this.changeBreadCramb()
+      // console.log(222,this.$route.path)
+    },
 }
 </script>
 

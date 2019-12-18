@@ -29,14 +29,14 @@
       </tr>
       <!-- {{if data.length > 0}} -->
         <!-- {{each data}} -->
-        <tr>
-          <td>1</td>
-          <td><img width="50" height="50" src="http://10.9.164.98:3000/uploads" alt=""></td>
-          <td>fds</td>
-          <td>fdss</td>
-          <td>vxc</td>
-          <td>htr</td>
-          <td>fsd</td>
+        <tr v-if="positionLists.length>0" v-for="(item, index) in positionLists" :key="index">
+          <td>{{index+1}}</td>
+          <td><img width="50" height="50" :src="positionLists[index].cover" alt=""></td>
+          <td>{{positionLists[index].title}}</td>
+          <td>{{positionLists[index].id}}</td>
+          <td>{{positionLists[index].rate}}</td>
+          <td>{{positionLists[index].is_new}}</td>
+          <td>{{positionLists[index].playable}}</td>
           <td>
             <button class="btn btn-sm btn-primary pos-edit" posid=""><span class="fa fa-edit"></span> 修改</button>
             <button class="btn btn-sm btn-danger pos-remove" posid="" filename=""><span class="fa fa-remove"></span> 删除</button>
@@ -44,7 +44,7 @@
         </tr>
         <!-- {{/each}} -->
       <!-- {{else}} -->
-        <tr>
+        <tr v-else>
           <td colspan="8">暂无记录。</td>
         </tr>
       <!-- {{/if}} -->
@@ -65,12 +65,38 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
     name:'PositionList',
     data() {
         return {
-            
+            positionLists:[],
         }
+    },
+
+    beforeRouteEnter (to, from, next) {
+      // next(vm => {
+      //   // 通过 `vm` 访问组件实例
+      //   console.log(121)
+      // })
+      axios.get("/mock/users/isSignin.json").then((res)=>{
+        if(res.data.name == "ma" && res.data.password =="ma1215"){
+          next()
+          // next( vm => {
+          //   console.log(vm)
+          // })
+        }else{
+          alert('请求受限，请先登录！')
+        }
+      })
+    },
+
+    mounted() {
+      axios.get("/mock/users/positionList.json").then((res)=>{
+        this.positionLists = res.data.subjects;
+
+      })
     },
 }
 </script>

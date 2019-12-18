@@ -118,39 +118,44 @@
           <!-- Menu Toggle Button -->
           <a href="#" class="dropdown-toggle" data-toggle="dropdown">
             <!-- The user image in the navbar-->
-            <!-- {{if isSignin}} -->
-            <img src="../assets/images/user2-160x160.jpg" class="user-image" alt="User Image">
-            <!-- hidden-xs hides the username on small devices so only the image appears. -->
-            <span class="hidden-xs">{{greeting}}</span>
-            <!-- {{else}} -->
-            <div id="click-btn">
-              <span id="btn-signin">登录</span>
-              <span id="btn-signup">注册</span>
-            </div>
+            <template v-if="isSignin">
+              <img src="../assets/images/user2-160x160.jpg" class="user-image" alt="User Image">
+              <!-- hidden-xs hides the username on small devices so only the image appears. -->
+              <span class="hidden-xs">{{greeting}}</span>
+            </template>
+            <template v-else>
+              <div id="click-btn">
+                <span @click="changeButtonType('signin')">登录</span>
+                <span @click="changeButtonType('signup')">注册</span>
+              </div>
+            </template>
             <!-- {{/if}} -->
           </a>
           <ul class="dropdown-menu">
             <!-- The user image in the menu -->
             <!-- {{if !isSignin}} -->
-            <li class="user-header" id="user-header">
-              <form role="form">
-                <div class="box-body">
-                  <div class="form-group user">
-                    <label for="exampleInputEmail1">用户名：</label>
-                    <input type="text" class="form-control" id="username" placeholder="请输入用户名">
+            <template v-if="!isSignin">
+              <li class="user-header" id="user-header">
+                <form role="form">
+                  <div class="box-body">
+                    <div class="form-group user">
+                      <label for="exampleInputEmail1">用户名：</label>
+                      <input type="text" class="form-control" v-model="userinfo.username" placeholder="请输入用户名">
+                    </div>
+                    <div class="form-group">
+                      <label for="exampleInputPassword1">密码：</label>
+                      <input type="password" class="form-control" v-model="userinfo.password" placeholder="请输入密码">
+                    </div>
                   </div>
-                  <div class="form-group">
-                    <label for="exampleInputPassword1">密码：</label>
-                    <input type="password" class="form-control" id="password" placeholder="请输入密码">
-                  </div>
-                </div>
-              </form>
-            </li>
-            <!-- {{else}} -->
+                </form>
+              </li>
+            </template>
 
-            <li class="user-header">
-              <img src="../assets/images/user2-160x160.jpg" class="img-circle" alt="User Image">
-            </li>
+            <template v-else>
+              <li class="user-header">
+                <img src="../assets/images/user2-160x160.jpg" class="img-circle" alt="User Image">
+              </li>
+            </template>
             <!-- {{/if}} -->
 
             <!-- Menu Footer-->
@@ -158,14 +163,18 @@
               <div class="pull-left">
                 <a href="javascript:void(0)" class="btn btn-default btn-flat">关闭</a>
               </div>
-              <!-- {{if !isSignin}} -->
-              <div class="pull-right">
-                <a href="javascript:void(0)" id="user-submit" class="btn btn-default btn-flat">提交</a>
-              </div>
-              <!-- {{else}} -->
-              <div class="pull-right">
-                <a href="javascript:void(0)" id="user-signout" class="btn btn-default btn-flat">退出</a>
-              </div>
+              <template v-if="!isSignin">
+                <div class="pull-right">
+                  <a href="javascript:void(0)" @click="handleSubmitClick()" class="btn btn-default btn-flat">提交</a>
+                </div>
+              </template>
+              
+              <template v-else>
+                <div class="pull-right">
+                  <a href="javascript:void(0)" @click="handleSignoutClick()" class="btn btn-default btn-flat">退出</a>
+                </div>
+              </template>
+              
               <!-- {{/if}} -->
             </li>
           </ul>
@@ -181,51 +190,73 @@
 </template>
 
 <script>
-import userModel from '../models/user'
-// import axios from 'axios'
+// import userModel from '../models/user'
+// var wsCache = new WebStorageCache()
 
-const wsCache = new WebStorageCache()
+import axios from 'axios'
 export default {
     name:'Header',
     data(){
         return{
             greeting:'',
+            isSignin:false,
+            buttonType:'',
+            userinfo:{
+              username:'ma',
+              password:'ma1215'
+              // username:'',
+              // password:''
+            }
         }
     },
-    mounted() {
-      let result = userModel.isSignin({
-         type:"movie",
-         tag:"热门",
-         page_limit:50,
-         page_start:0
-      })
-      console.log(111, result)
-      // axios.get("/api/search_subjects",
-      //  {
-      //    type:"movie",
-      //    tag:"热门",
-      //    page_limit:50,
-      //    page_start:0
-      //  }).then((res)=>{
-      //   console.log(res)
-      // })
-  // userModel.isSignin(wsCache.get('token'))
-      // https://movie.douban.com/j/search_subjects?type=movie&tag=%E7%83%AD%E9%97%A8&page_limit=50&page_start=0
-      // type=movie&tag=热门&page_limit=50&page_start=0
-      // let return = await userModel.isSignin(wsCache.get('token'))
 
-      // axios.get('/api/search_subjects')
-      // .then(function (response) {
-      //     _this.resp='我的大中国'
-      //     _this.resp=response.data.data.permissions;
-      //     console.log('响应的数据')
-      //     console.log(typeof response.data.data.permissions)
-      //     console.log( response.data.data.permissions)
-      //     console.log(response.data.data);
-      // })
-      // .catch(function (error) {
-      //     console.log(error);
-      // });
+    mounted() {
+      axios.get("/mock/users/isSignin.json").then((res)=>{
+        // console.log(res.data)
+        if(res.data.name == "ma" && res.data.password =="ma1215"){
+          this.greeting = `你好, ${res.data.name}`;
+        }else{
+          this.greeting = '',
+          this.isSignin = false
+        }
+      })
+    },
+
+    methods: {
+      changeButtonType(type){
+        this.buttonType = type
+      },
+
+      async handleSubmitClick(){
+        // const {userinfo, password} = this.userinfo;
+        if(this.buttonType == 'signin'){
+          // console.log('signin');
+          // let result = await userModel.sign(this.userinfo, 'signin')
+          // if(result.ret){
+          //   wsCache.set('token', result.data.token);
+          //   this.greeting = `你好，${result.data.username}`;
+          //   this.isSignin = true
+          // }
+          axios.get("/mock/users/isSignin.json").then((res)=>{
+            if(res.data.name == this.userinfo.username && res.data.password == this.userinfo.password){
+              this.greeting = `你好, ${res.data.name}`;
+              this.isSignin = true
+            }else{
+              this.greeting = '',
+              this.isSignin = false
+            }
+          })
+        }else{
+          // let result = await userModel.sign(this.userinfo, 'signup')
+          // console.log('signup');
+        }
+      },
+
+      handleSignoutClick(){
+        // wsCache.delete('token');
+        this.greeting = '';
+        this.isSignin = false;
+      }
     },
 }
 </script>
